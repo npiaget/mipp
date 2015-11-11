@@ -81,4 +81,4 @@ def _nice2cmp(val):
 
 if __name__ == '__main__':
     import sys
-    print Metadata().read(sys.argv[1])
+    print(Metadata().read(sys.argv[1]))

@@ -136,6 +136,6 @@ if __name__ == '__main__':
         _mda = read_metadata(fp.read())
     _mda.image_filename = os.path.dirname(sys.argv[1]) + '/' + \
         _mda.image_filename        
-    print _mda
+    print(_mda)
     _mda, _data = read_image(_mda, calibrate=False)
-    print _data.min(), _data.mean(), _data.max()
+    print(_data.min(), _data.mean(), _data.max())

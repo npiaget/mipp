@@ -160,7 +160,7 @@ if __name__ == '__main__':
     try:
         _file = args[0]
     except IndexError:
-        print >> sys.stderr, "usage: sat.py [-m] <tar-file>"
+        print("usage: sat.py [-m] <tar-file>", file=sys.stderr)
         sys.exit(1)
     _mda = load_file(_file, 'sarx', only_metadata=True)
     if only_mda:
@@ -170,4 +170,4 @@ if __name__ == '__main__':
         _mda, _image = load_file(_file, 'sarx', calibrate=0)
     else:
         _mda, _image = load_file(_file, 'sarx')
-    print '\n', _mda
+    print('\n', _mda)

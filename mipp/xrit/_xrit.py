@@ -304,7 +304,7 @@ class Segment(object):
         keys.sort()
         for k in keys:
             if not k.startswith('_'):
-                print k + ':', self.__dict__[k]
+                print(k + ':', self.__dict__[k])
 
     def __str__(self):
         return self.segment_id
@@ -373,13 +373,13 @@ def list(file_name, dump_data=False):
     fname = 'xrit.dat'
     fp = open(file_name)
     for hdr in read_header(fp):
-        print hdr
+        print(hdr)
         if hdr.hdr_name == 'annotation':
             fname = hdr.segment_id
     data = fp.read()
     fp.close()
     if dump_data:
-        print 'Writing', fname
+        print('Writing', fname)
         fp = open(fname, 'wb')
         fp.write(data)
         fp.close()

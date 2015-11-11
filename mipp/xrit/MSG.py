@@ -885,4 +885,4 @@ def read_scanline_quality(segment_filename):
 if __name__ == '__main__':
     p = _xrit.read_prologue(sys.argv[1])
     e = _xrit.read_epilogue(sys.argv[-1])
-    print read_metadata(p, sys.argv[2:-1], e)
+    print(read_metadata(p, sys.argv[2:-1], e))

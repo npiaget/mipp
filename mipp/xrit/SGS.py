@@ -121,4 +121,4 @@ def read_prologue_headers(fp):
     return hdr
     
 if __name__ == '__main__':
-    print read_metadata(_xrit.read_prologue(sys.argv[1]), sys.argv[2:])
+    print(read_metadata(_xrit.read_prologue(sys.argv[1]), sys.argv[2:]))

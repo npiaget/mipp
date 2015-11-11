@@ -4,7 +4,7 @@ import unittest
 import cStringIO
 
 import buildpath_to_syspath
-print sys.path
+print(sys.path)
 import mipp.cfg
 
 datadir = (os.path.dirname(__file__) or '.') + '/data'
@@ -18,14 +18,14 @@ class Test(unittest.TestCase):
         fp = cStringIO.StringIO()
         for name in ('satellite', 'level1', 'level2'):
             h = c(name)
-            print >>fp, name
+            print(name, file=fp)
             for k in sorted(h.keys()):
-                print >>fp, '    ', k + ':',  h[k]
-        print >>fp, mipp.cfg._Channel(c(1).items())
-        print >>fp, mipp.cfg._Channel(c(2).items())
-        print >>fp, mipp.cfg._Channel(c(3).items())
+                print('    ', k + ':',  h[k], file=fp)
+        print(mipp.cfg._Channel(c(1).items()), file=fp)
+        print(mipp.cfg._Channel(c(2).items()), file=fp)
+        print(mipp.cfg._Channel(c(3).items()), file=fp)
         for name in c.channel_names:
-            print >>fp, c.get_channel(name)
+            print(c.get_channel(name), file=fp)
         text1 = fp.getvalue().strip()
         fp.close()
         fp = open(datadir + '/' + cfgfile + '.cfg.out')

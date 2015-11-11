@@ -11,4 +11,4 @@ class Metadata(mipp.mda.Metadata):
 
 if __name__ == '__main__':
     import sys
-    print Metadata().read(sys.argv[1])
+    print(Metadata().read(sys.argv[1]))

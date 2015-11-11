@@ -112,8 +112,8 @@ if __name__ == '__main__':
     cfg = read_config(os.path.splitext(fname)[0])
     for _name in ('satellite', 'level1', 'level2'):
         _sec = cfg(_name)
-        print _name
+        print(_name)
         for _key in sorted(_sec.keys()):
-            print '    ', _key + ':',  _sec[_key]
+            print('    ', _key + ':',  _sec[_key])
     for _name in cfg.channel_names:
-        print cfg.get_channel(_name)
+        print(cfg.get_channel(_name))

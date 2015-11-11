@@ -1,5 +1,5 @@
 #
-# $Id$ 
+# $Id$
 #
 
 """This module will read satellit data files in OpenMTP format (eg. Meteosat-7 prolog file). Format described in:
@@ -23,7 +23,7 @@ ASCII_HEADER_LEN = 1345
 BINARY_HEADER_LEN = 144515
 BINARY_HEADER_LEN_VISCOMP = 192999
 
-def _read_ascii_header(fp):    
+def _read_ascii_header(fp):
     fp = StringIO(fp.read(ASCII_HEADER_LEN)) # Don't mix iteration and read method.
     hdr = dict()
     for line in fp:
@@ -264,15 +264,15 @@ temp2rad[7] = np.array([ [170.0, 0.020], [171.0, 0.022], [172.0, 0.024],
 class _Calibrator(object):
     def __init__(self, hdr):
         self.hdr = hdr
-        
+
     def __call__(self, image, calibrate=1):
         """From http://www.eumetsat.int/Home/Main/DataProducts/Calibration/MFGCalibration/index.htm?l=en
         """
         # don't know how to calibrate
         if calibrate == 0:
-            return (image, 
+            return (image,
                     "counts")
-        
+
         if(self.hdr["space"] is None or
            self.hdr["calco"] is None):
             raise CalibrationError("Not implemented")
@@ -332,4 +332,4 @@ def read_metadata(prologue, image_files):
 
 if __name__ == '__main__':
     p = _xrit.read_prologue(sys.argv[1])
-    print read_metadata(p, sys.argv[2:])
+    print(read_metadata(p, sys.argv[2:]))
