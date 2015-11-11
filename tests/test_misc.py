@@ -1,3 +1,4 @@
+from __future__ import print_function
 import sys
 import os
 import unittest
@@ -12,7 +13,7 @@ datadir = (os.path.dirname(__file__) or '.') + '/data'
 class Test(unittest.TestCase):
 
     def test_config_parser(self):
-        cfgfile = 'msg2'        
+        cfgfile = 'msg2'
         os.environ['PPP_CONFIG_DIR'] = datadir
         c = mipp.cfg.read_config(cfgfile)
         fp = cStringIO.StringIO()
@@ -36,4 +37,4 @@ class Test(unittest.TestCase):
 if __name__ == '__main__':
     unittest.main()
 
-    
+
