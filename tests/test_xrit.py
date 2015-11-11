@@ -11,7 +11,7 @@ from mipp.mda import _nice2cmp
 
 datadir = (os.path.dirname(__file__) or '.') + '/data'
 save_mda = False
-debug = os.environ.has_key('DEBUG')
+debug = 'DEBUG' in os.environ
 
 xrit_decomp_exec = os.environ.get("XRIT_DECOMPRESS_PATH", None)
 xrit_outdir = os.environ.get("XRIT_DECOMPRESS_OUTDIR", None)
