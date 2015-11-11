@@ -22,7 +22,7 @@ try:
 except KeyError:
     os.environ['PPP_CONFIG_DIR'] = datadir
 if not os.path.isdir(os.environ['PPP_CONFIG_DIR']):
-    raise mipp.ConfigReaderError, "No config dir: '%s'"%os.environ['PPP_CONFIG_DIR']
+    raise mipp.ConfigReaderError("No config dir: '%s'"%os.environ['PPP_CONFIG_DIR'])
 
 goes_files = [datadir + '/L-000-MSG2__-GOES11______-10_7_135W-PRO______-201002010600-__',
               datadir + '/L-000-MSG2__-GOES11______-10_7_135W-000003___-201002010600-__',

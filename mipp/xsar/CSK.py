@@ -24,7 +24,7 @@ class _Calibrator(object):
         if calibrate == 0:
             return (image,
                     'counts')
-        raise mipp.CalibrationError, self.error
+        raise mipp.CalibrationError(self.error)
 
 def read_metadata(xmlbuffer):
     mda = Metadata()    
