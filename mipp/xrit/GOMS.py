@@ -34,7 +34,7 @@ logger = logging.getLogger(__name__)
 
 from mipp.xrit import bin_reader as rbin
 from mipp.xrit import Metadata
-from StringIO import StringIO
+from io import StringIO
 from mipp.xrit import _xrit
 import numpy as np
 

@@ -9,7 +9,7 @@
 
 import sys
 import os
-from StringIO import StringIO 
+from io import StringIO 
 
 import mipp
 from mipp.xrit import bin_reader as rbin

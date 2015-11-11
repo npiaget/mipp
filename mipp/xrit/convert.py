@@ -1,4 +1,4 @@
-from StringIO import StringIO
+from io import StringIO
 import numpy as np
 
 def dec10216(in_buffer):

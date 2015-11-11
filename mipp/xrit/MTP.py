@@ -8,7 +8,7 @@
 
 import sys
 from datetime import timedelta
-from StringIO import StringIO
+from io import StringIO
 import numpy as np
 
 from mipp import CalibrationError

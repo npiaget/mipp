@@ -31,7 +31,7 @@ logger = logging.getLogger(__name__)
 
 import sys
 import numpy as np
-from StringIO import StringIO
+from io import StringIO
 
 from mipp import CalibrationError
 from mipp.xrit import _xrit
