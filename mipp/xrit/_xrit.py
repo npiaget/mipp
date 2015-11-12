@@ -1,5 +1,5 @@
 #
-# $Id$ 
+# $Id$
 #
 
 """This module will read LRIT/HRIT headers. Format described in:
@@ -9,7 +9,7 @@
 
 import sys
 import os
-from io import StringIO 
+from io import StringIO
 
 import mipp
 from mipp.xrit import bin_reader as rbin
@@ -49,7 +49,7 @@ def decompress(infile, outdir='.'):
     stdout = StringIO(p.communicate()[0])
     status = p.returncode
     os.chdir(cwd)
-    
+
     outfile = ''
     for line in stdout:
         try:
@@ -59,13 +59,13 @@ def decompress(infile, outdir='.'):
         if k == 'Decompressed file':
             outfile = v
             break
-    
+
     if status != 0:
         raise mipp.DecodeError("xrit_decompress '%s', failed, status=%d"%(infile, status))
     if not outfile:
         raise mipp.DecodeError("xrit_decompress '%s', failed, no output file is generated"%infile)
-    return outdir + '/' + outfile    
-    
+    return outdir + '/' + outfile
+
 #-----------------------------------------------------------------------------
 #
 # XRIT header records
@@ -73,37 +73,37 @@ def decompress(infile, outdir='.'):
 #-----------------------------------------------------------------------------
 class PrimaryHeader(object):
     hdr_type = 0
-    hdr_name = 'primary_header'    
+    hdr_name = 'primary_header'
     def __init__(self, fp):
         self.rec_len = rbin.read_uint2(fp.read(2))
         self.file_type = rbin.read_uint1(fp.read(1))
         self.total_hdr_len = rbin.read_uint4(fp.read(4))
         self.data_field_len = rbin.read_uint8(fp.read(8))
-        
+
     def __str__(self):
         return  "hdr_type:%d, rec_len:%d, file_type:%d, total_hdr_len:%d, data_field_len:%d"%\
                (self.hdr_type, self.rec_len, self.file_type, self.total_hdr_len, self.data_field_len)
 
 class ImageStructure(object):
     hdr_type = 1
-    hdr_name = 'structure'    
+    hdr_name = 'structure'
     def __init__(self, fp):
         self.rec_len = rbin.read_uint2(fp.read(2))
         self.nb = rbin.read_uint1(fp.read(1))
         self.nc = rbin.read_uint2(fp.read(2))
         self.nl = rbin.read_uint2(fp.read(2))
         self.compress_flag = rbin.read_uint1(fp.read(1))
-        
+
     def __str__(self):
         return  "hdr_type:%d, rec_len:%d, nb:%d, nc:%d, nl:%d, compress_flag:%d"%\
                (self.hdr_type, self.rec_len, self.nb, self.nc, self.nl, self.compress_flag)
 
 class ImageNavigation(object):
     hdr_type = 2
-    hdr_name = 'navigation'    
+    hdr_name = 'navigation'
     def __init__(self, fp):
         self.rec_len = rbin.read_uint2(fp.read(2))
-        self.proj_name = fp.read(32).strip()
+        self.proj_name = fp.read(32).strip().decode('utf8')
         self.cfac = rbin.read_int4(fp.read(4))
         self.lfac = rbin.read_int4(fp.read(4))
         self.coff = rbin.read_int4(fp.read(4))
@@ -114,28 +114,28 @@ class ImageNavigation(object):
             self.ssp = float(self.proj_name[i1+1:i2])
         else:
             self.ssp = None
-        
+
     def __str__(self):
         return  "hdr_type:%d, rec_len:%d, proj_name:'%s', cfac:%d, lfac:%d. coff:%d, loff:%d"%\
                (self.hdr_type, self.rec_len, self.proj_name, self.cfac, self.lfac, self.coff, self.loff)
 
 class ImageDataFunction(object):
     hdr_type = 3
-    hdr_name = 'data_function'    
+    hdr_name = 'data_function'
     def __init__(self, fp):
         self.rec_len = rbin.read_uint2(fp.read(2))
-        self.data_definition = _decode_data_definition(fp.read(self.rec_len-3))
-        
+        self.data_definition = _decode_data_definition(fp.read(self.rec_len-3).decode('utf8'))
+
     def __str__(self):
         return  "hdr_type:%d, rec_len:%d, data_definition:'%s'"%\
                (self.hdr_type, self.rec_len, self.data_definition)
 
 class AnnotationHeader(object):
     hdr_type = 4
-    hdr_name = 'annotation'    
+    hdr_name = 'annotation'
     def __init__(self, fp):
         self.rec_len = rbin.read_uint2(fp.read(2))
-        self.text = fp.read(self.rec_len-3).strip()
+        self.text = fp.read(self.rec_len-3).strip().decode('utf8')
         a = [x.strip('_') for x in self.text.split('-')]
         self.xrit_channel_id = a[0]
         self.dissemination_id = int(a[1])
@@ -154,7 +154,7 @@ class AnnotationHeader(object):
 
 class TimeStampRecord(object):
     hdr_type = 5
-    hdr_name = 'time_stamp'    
+    hdr_name = 'time_stamp'
     def __init__(self, fp):
         self.rec_len = rbin.read_uint2(fp.read(2))
         self.cds_p_field = rbin.read_uint1(fp.read(1))
@@ -166,7 +166,7 @@ class TimeStampRecord(object):
 
 class SegmentIdentification(object):
     hdr_type = 128
-    hdr_name = 'segment'    
+    hdr_name = 'segment'
     def __init__(self, fp):
         self.rec_len = rbin.read_uint2(fp.read(2))
         self.gp_sc_id = rbin.read_uint2(fp.read(2))
@@ -184,7 +184,7 @@ class SegmentIdentification(object):
 class ImageSegmentLineQuality(object):
     hdr_type = 129
     hdr_name = 'image_quality'
-    
+
     def __init__(self, fp):
         self.rec_len = rbin.read_uint2(fp.read(2))
         a = []
@@ -197,18 +197,18 @@ class ImageSegmentLineQuality(object):
             lg = rbin.read_uint1(fp.read(1))
             a.append((ln, stamp, lv, lr, lg))
             #print ln, lv, lr, lg, stamp
-            nb += 13            
-        self.line_quality = a        
+            nb += 13
+        self.line_quality = a
 
     def __str__(self):
         return  "hdr_type:%d, rec_len:%d"%\
                (self.hdr_type, self.rec_len)
 
 class UnknownHeader(object):
-    hdr_name = 'unknown'    
+    hdr_name = 'unknown'
     def __init__(self, hdr_type, fp):
         self.hdr_type = hdr_type
-        self.rec_len = rbin.read_uint2(fp.read(2))        
+        self.rec_len = rbin.read_uint2(fp.read(2))
         self.data = fp.read(self.rec_len-3)
     def __str__(self):
         return  "hdr_type:%d, rec_len:%d"%\
@@ -228,7 +228,7 @@ def _decode_data_definition(buf):
         else:
             raise mipp.DecodeError("could not decode data definition: '%s'"%a)
     return dd
-    
+
 header_map = {0: PrimaryHeader,
               1: ImageStructure,
               2: ImageNavigation,
@@ -267,7 +267,7 @@ def read_headers(fp):
 class Segment(object):
     def __init__(self, file_name):
         self.file_name = file_name
-        fp = open(file_name)
+        fp = open(file_name, 'rb')
         for h in read_header(fp):
             if h.hdr_type == 0:
                 self.file_type = h.file_type
@@ -293,7 +293,7 @@ class Segment(object):
     @property
     def data(self):
         if not self._blob:
-            fp = open(self.file_name)
+            fp = open(self.file_name, 'rb')
             read_headers(fp)
             self._blob = fp.read()
             fp.close()
@@ -313,18 +313,18 @@ class ImageSegment(Segment):
 
     def __init__(self, file_name):
         Segment.__init__(self, file_name)
-        self.bytes_per_line = (self.structure.nc*self.structure.nb)/8
+        self.bytes_per_line = (self.structure.nc*self.structure.nb)//8
         self.fp = None
-    
+
     def readline(self, nlines=1):
         if not self.fp:
-            self.fp = open(self.file_name)
+            self.fp = open(self.file_name, 'rb')
             read_headers(self.fp)
         data = self.fp.read(self.bytes_per_line*nlines)
         if not data:
             raise mipp.DecodeError("could not read", self.bytes_per_line*nlines, "bytes")
         return data
-    
+
     def close(self):
         if self.fp:
             self.fp.close()
@@ -350,15 +350,15 @@ def read_imagedata(file_name):
         return ImageSegment(file_name)
     else:
         raise mipp.DecodeError("this is no 'image data' file: '%s'"%file_name)
-    
-    
+
+
 def read_gts_message(file_name):
     s = Segment(file_name)
     if s.file_type == 1:
         return s
     else:
         raise mipp.DecodeError("this is no 'GTS Message' file: '%s'"%file_name)
-    
+
 def read_mpef(file_name):
     s = Segment(file_name)
     if s.file_type == 144:
@@ -371,7 +371,7 @@ read_mpef_clm = read_mpef
 
 def list(file_name, dump_data=False):
     fname = 'xrit.dat'
-    fp = open(file_name)
+    fp = open(file_name, 'rb')
     for hdr in read_header(fp):
         print(hdr)
         if hdr.hdr_name == 'annotation':
@@ -383,7 +383,7 @@ def list(file_name, dump_data=False):
         fp = open(fname, 'wb')
         fp.write(data)
         fp.close()
-    
+
 #-----------------------------------------------------------------------------
 if __name__ == '__main__':
     args = sys.argv[1:]
@@ -394,5 +394,5 @@ if __name__ == '__main__':
     else:
         dump_data = False
         filename = args[0]
-        
+
     list(filename, dump_data)
