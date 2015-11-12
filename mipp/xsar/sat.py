@@ -119,7 +119,7 @@ class SatelliteLoader(object):
     def _find_tarfile(self, time_stamp):
         opt = self._config_reader('level1')
         if not os.path.isdir(opt['dir']):
-            raise IOError, "No such directory: %s" % opt['dir']
+            raise IOError("No such directory: %s" % opt['dir'])
         tar_file = glob.glob(opt['dir'] + '/' +
                              time_stamp.strftime(opt['filename_archive']))
         if not tar_file:
