@@ -10,6 +10,13 @@ import sys
 if sys.version_info > (3,):
     long = int
 
+
+def ordb(x):
+    if sys.version_info > (3,):
+        return x
+    else:
+        return ord(x)
+
 def read_uint1(buf):
     return struct.unpack("!B", buf)[0]
 
@@ -52,7 +59,7 @@ def read_cuc_time(buf, coarce, fine):
     ctime = 0
     ftime = 0
     for i in range(coarce - 1, -1, -1):
-        ctime += ord(buf[coarce - i - 1]) * 2 ** (i * 8)
+        ctime += ordb(buf[coarce - i - 1]) * 2 ** (i * 8)
     for i in range(fine):
-        ftime += ord(buf[coarce + i]) * 2 ** ((i + 1) * -8)
+        ftime += ordb(buf[coarce + i]) * 2 ** ((i + 1) * -8)
     return datetime(1958, 1, 1) + timedelta(seconds=ctime + ftime)
