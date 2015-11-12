@@ -22,7 +22,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-"""This module will read MSG level1.5 files, format documented in: 
+"""This module will read MSG level1.5 files, format documented in:
 'MSG Level 1.5 Image Data Format Description', EUM/MSG/ICD/105, v5A, 22 August 2007
 """
 #raise NotImplementedError
@@ -31,7 +31,7 @@ logger = logging.getLogger(__name__)
 
 import sys
 import numpy as np
-from io import StringIO
+from io import BytesIO
 
 from mipp import CalibrationError
 from mipp.xrit import _xrit
@@ -55,7 +55,7 @@ if sys.version_info[0] >= 2 and sys.version_info[1] >= 5:
 else:
     logger.warning('Older version of python. Module numexpr not used. '
                    'Performance will be slower.')
-        
+
 
 #Reflectance factor for visible bands
 HRV_F    = 25.15
@@ -205,17 +205,17 @@ BTFIT_A_IR_039 =  0.0
 BTFIT_A_WV_062 =  0.00001805700
 BTFIT_A_WV_073 =  0.00000231818
 BTFIT_A_IR_087 = -0.00002332000
-BTFIT_A_IR_097 = -0.00002055330 
+BTFIT_A_IR_097 = -0.00002055330
 BTFIT_A_IR_108 = -0.00007392770
 BTFIT_A_IR_120 = -0.00007009840
 BTFIT_A_IR_134 = -0.00007293450
 
 BTFIT_B_IR_039 =  1.011751900
-BTFIT_B_WV_062 =  1.000255533 
+BTFIT_B_WV_062 =  1.000255533
 BTFIT_B_WV_073 =  1.000668281
 BTFIT_B_IR_087 =  1.011803400
-BTFIT_B_IR_097 =  1.009370670  
-BTFIT_B_IR_108 =  1.032889800 
+BTFIT_B_IR_097 =  1.009370670
+BTFIT_B_IR_108 =  1.032889800
 BTFIT_B_IR_120 =  1.031314600
 BTFIT_B_IR_134 =  1.030424800
 
@@ -236,7 +236,7 @@ class _Calibrator(object):
     def __init__(self, hdr, channel_name):
         self.hdr = hdr
         self.channel_name = channel_name
-        
+
     def __call__(self, image, calibrate=1):
         """Computes the radiances and reflectances/bt of a given channel.  The
         *calibrate* argument should be set to 0 for no calibration, 1 for
@@ -248,7 +248,7 @@ class _Calibrator(object):
         channel_name = self.channel_name
 
         if calibrate == 0:
-            return (image, 
+            return (image,
                     "counts")
 
         channels = {"VIS006": 1,
@@ -268,18 +268,18 @@ class _Calibrator(object):
         chn_nb = channels[channel_name] - 1
 
         mask = (image == no_data_value)
-        
+
         cslope = hdr["Level1_5ImageCalibration"][chn_nb]['Cal_Slope']
         coffset = hdr["Level1_5ImageCalibration"][chn_nb]['Cal_Offset']
-        
+
         radiances = eval_np('image * cslope + coffset')
         radiances[radiances < 0] = 0
-        
+
         if calibrate == 2:
             return (np.ma.MaskedArray(radiances, mask=mask),
                     "mW m-2 sr-1 (cm-1)-1")
-            
-        
+
+
         sat = hdr["SatelliteDefinition"]["SatelliteId"]
         if sat not in CALIB:
             raise CalibrationError("No calibration coefficients available for "
@@ -288,7 +288,7 @@ class _Calibrator(object):
         if channel_name in ["HRV", "VIS006", "VIS008", "IR_016"]:
             solar_irradiance = CALIB[sat][channel_name]["F"]
             reflectance = eval_np('(radiances / solar_irradiance) * 100.')
-            return (np.ma.MaskedArray(reflectance, mask=mask), 
+            return (np.ma.MaskedArray(reflectance, mask=mask),
                     "%")
 
         wavenumber = CALIB[sat][channel_name]["VC"]
@@ -296,22 +296,22 @@ class _Calibrator(object):
             #computation based on effective radiance
             alpha = CALIB[sat][channel_name]["ALPHA"]
             beta = CALIB[sat][channel_name]["BETA"]
-            
-            cal_data = eval_np(('((C2 * 100. * wavenumber / ' 
-                                'log(C1 * 1.0e6 * wavenumber ** 3 / ' 
+
+            cal_data = eval_np(('((C2 * 100. * wavenumber / '
+                                'log(C1 * 1.0e6 * wavenumber ** 3 / '
                                 '(1.0e-5 * radiances) + 1)) - beta) / alpha'))
-            
+
         elif cal_type[chn_nb] == 1:
             #computation based on spectral radiance
             cal_data = eval_np(('C2 * 100. * wavenumber / '
                                 'log(C1 * 1.0e6 * wavenumber ** 3 / '
                                 '(1.0e-5 * radiances) + 1))'))
-            
+
             coef_a = eval("BTFIT_A_" + channel_name)
             coef_b = eval("BTFIT_B_" + channel_name)
             coef_c = eval("BTFIT_C_" + channel_name)
-            
-            cal_data = eval_np(('cal_data ** 2 * coef_a + ' 
+
+            cal_data = eval_np(('cal_data ** 2 * coef_a + '
                                 'cal_data * coef_b + coef_c'))
 
         else:
@@ -319,7 +319,7 @@ class _Calibrator(object):
 
         mask = mask | np.isnan(cal_data) | np.isinf(cal_data)
         cal_data = np.ma.MaskedArray(cal_data, mask=mask)
-        return (cal_data, 
+        return (cal_data,
                 "K")
 
 def read_proheader(fp):
@@ -380,15 +380,15 @@ def read_proheader(fp):
 
     hdr["Attitude"] = attitude
     del attitude
-    
+
     # SpinRateatRCStart
-    
+
     hdr["SpinRateatRCStart"] = rbin.read_float8(fp.read(8))
 
     # UTCCorrelation
 
     utccor = {}
-    
+
     utccor["PeriodStartTime"] = rbin.read_cds_time(fp.read(6))
     utccor["PeriodEndTime"] = rbin.read_cds_time(fp.read(6))
     utccor["OnBoardTimeStart"] = rbin.read_cuc_time(fp.read(7), 4, 3)
@@ -411,7 +411,7 @@ def read_proheader(fp):
     hdr["PlannedAcquisitionTime"] = pat
 
     # RadiometerStatus
-    
+
     radiostatus = {}
     radiostatus["ChannelStatus"] = np.fromstring(fp.read(12), dtype=np.uint8)
     radiostatus["DetectorStatus"] = np.fromstring(fp.read(42), dtype=np.uint8)
@@ -559,11 +559,11 @@ def read_proheader(fp):
     covvisir["WesternColumnPlanned"] = rbin.read_int4(fp.read(4))
 
     hdr["PlannedCoverageVIS_IR"] = covvisir
-    
+
     # PlannedCoverageHRV
 
     covhrv = {}
-    
+
     covhrv["LowerSouthLinePlanned"] = rbin.read_int4(fp.read(4))
     covhrv["LowerNorthLinePlanned"] = rbin.read_int4(fp.read(4))
     covhrv["LowerEastColumnPlanned"] = rbin.read_int4(fp.read(4))
@@ -579,7 +579,7 @@ def read_proheader(fp):
 
     image_proc_direction = ["North-South", "South-North"]
     pixel_gen_direction = ["East-West", "West-East"]
-    
+
     l15prod = {}
     l15prod["ImageProcDirection"] = image_proc_direction[ord(fp.read(1))]
     l15prod["PixelGenDirection"] = pixel_gen_direction[ord(fp.read(1))]
@@ -597,7 +597,7 @@ def read_proheader(fp):
 
     rpsummary = {}
     rpsummary["RadianceLinearization"] = np.fromstring(fp.read(12), dtype=np.bool)
-    
+
     rpsummary["DetectorEqualization"] = np.fromstring(fp.read(12), dtype=np.bool)
     rpsummary["OnboardCalibrationResult"] = np.fromstring(fp.read(12), dtype=np.bool)
     rpsummary["MPEFCalFeedback"] = np.fromstring(fp.read(12), dtype=np.bool)
@@ -679,7 +679,7 @@ def read_proheader(fp):
                                     ('MinCount', '>u2'),
                                     ('BB_Processing_Slope', '>f8'),
                                     ('BB_Processing_Offset', '>f8')])
-    
+
     bbdu["BBRelatedData"]["ExtractedBBData"] = np.fromstring(fp.read(32 * 12),
                                                              dtype=extracted_data_type)
     impf_cal_type = np.dtype([("ImageQualityFlag", "u1"),
@@ -694,14 +694,14 @@ def read_proheader(fp):
                               ("CalMonRms", ">f4"),
                               ("OffsetCount", ">f4")])
 
-    
+
     bbdu["MPEFCalFeedback"] = np.fromstring(fp.read(32 * 12),
                                             dtype=impf_cal_type)
-    
+
     bbdu["RadTransform"] = np.fromstring(fp.read(42 * 64 * 4),
                                             dtype=">f4").reshape((42,64))
     bbdu["RadProcMTFAdaptation"] = {}
-    
+
     bbdu["RadProcMTFAdaptation"]["VIS_IRMTFCorrectionE_W"] = np.fromstring(fp.read(33 * 16 * 4),
                                                                            dtype=">f4").reshape((33, 16))
     bbdu["RadProcMTFAdaptation"]["VIS_IRMTFCorrectionN_S"] = np.fromstring(fp.read(33 * 16 * 4),
@@ -797,12 +797,12 @@ def read_metadata(prologue, image_files, epilogue):
     """
     segment_size = 464 # number of lines in a segment
 
-    fp = StringIO(prologue.data)
+    fp = BytesIO(prologue.data)
     hdr = read_proheader(fp)
 
-    fp = StringIO(epilogue.data)
+    fp = BytesIO(epilogue.data)
     ftr = read_epiheader(fp)
-    
+
     im = _xrit.read_imagedata(image_files[0])
 
     md = Metadata()
@@ -817,7 +817,7 @@ def read_metadata(prologue, image_files, epilogue):
     else:
         md.image_size = np.array((hdr["ReferenceGridVIS_IR"]["NumberOfLines"],
                                   hdr["ReferenceGridVIS_IR"]["NumberOfColumns"]))
-        
+
     md.satname = im.platform.lower()
     md.product_type = 'full disc'
     md.region_name = 'full disc'
@@ -872,15 +872,15 @@ def read_scanline_quality(segment_filename):
     Type 129 - Image Segment Line Quality as decribed in the 'MSG Ground
     Segment LRIT/HRIT Mission Specific Implementation, EUM/MSG/SPE/057'
     document, see reference below.
-    
+
     This record contains the scan line mean acquisition times
-    
+
     http://www.eumetsat.int/website/wcm/idc/idcplg?IdcService=GET_FILE&dDocName=PDF_TEN_05057_SPE_MSG_LRIT_HRI&RevisionSelectionMethod=LatestReleased&Rendition=Web
 
     """
     imgdata = _xrit.read_imagedata(segment_filename)
     return imgdata.image_quality.line_quality
-    
+
 
 if __name__ == '__main__':
     p = _xrit.read_prologue(sys.argv[1])
