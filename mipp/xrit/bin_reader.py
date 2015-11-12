@@ -1,10 +1,14 @@
 #
-# $Id$ 
+# $Id$
 #
 # Unpack binary data, all in network (big-endian) byte order.
 #
 import struct
 from datetime import datetime, timedelta
+
+import sys
+if sys.version_info > (3,):
+    long = int
 
 def read_uint1(buf):
     return struct.unpack("!B", buf)[0]
@@ -17,7 +21,7 @@ def read_uint4(buf):
 
 def read_uint8(buf):
     v = struct.unpack("!2I", buf)
-    return v[0]*pow(2L, 32) + v[1]
+    return v[0]*pow(long(2), 32) + v[1]
 
 def read_int2(buf):
     return struct.unpack("!h", buf)[0]
@@ -51,4 +55,4 @@ def read_cuc_time(buf, coarce, fine):
         ctime += ord(buf[coarce - i - 1]) * 2 ** (i * 8)
     for i in range(fine):
         ftime += ord(buf[coarce + i]) * 2 ** ((i + 1) * -8)
-    return datetime(1958, 1, 1) + timedelta(seconds=ctime + ftime) 
+    return datetime(1958, 1, 1) + timedelta(seconds=ctime + ftime)
