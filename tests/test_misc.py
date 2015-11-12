@@ -2,7 +2,7 @@ from __future__ import print_function
 import sys
 import os
 import unittest
-import cStringIO
+import io
 
 import buildpath_to_syspath
 print(sys.path)
@@ -16,7 +16,7 @@ class Test(unittest.TestCase):
         cfgfile = 'msg2'
         os.environ['PPP_CONFIG_DIR'] = datadir
         c = mipp.cfg.read_config(cfgfile)
-        fp = cStringIO.StringIO()
+        fp = io.StringIO()
         for name in ('satellite', 'level1', 'level2'):
             h = c(name)
             print(name, file=fp)
