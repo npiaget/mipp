@@ -1,5 +1,5 @@
 #
-# $Id$ 
+# $Id$
 #
 import numpy
 import glob
@@ -12,7 +12,7 @@ logger = logging.getLogger('mipp')
 
 import mipp
 import mipp.cfg
-from mipp.xrit import _xrit 
+from mipp.xrit import _xrit
 from mipp.xrit.loader import ImageLoader
 import os
 
@@ -82,7 +82,7 @@ class SatelliteLoader(object):
             try:
                 sublon = float(projname.split('(')[1].split(')')[0])
             except (IndexError, ValueError):
-                raise mipp.ReaderError("Could not determine sub satellite " + 
+                raise mipp.ReaderError("Could not determine sub satellite " +
                                        "point from projection name '%s'"%
                                        projname)
             self.proj4_params = "proj=geos lon_0=%.2f lat_0=0.00 a=6378169.00 b=6356583.80 h=35785831.00" % sublon
@@ -96,7 +96,7 @@ class SatelliteLoader(object):
         val["channel"] = channel + '*'
 
         # Prologue
-        
+
         val["segment"] = "PRO".ljust(9, '_')
 
         filename_pro = opt.get('filename_pro', opt['filename'])
@@ -107,11 +107,11 @@ class SatelliteLoader(object):
         prologue = prologue[0]
 
         # Regular channels
-           
+
         val["segment"] = "0????????"
         image_files = glob.glob(opt['dir'] + '/' + \
                                 time_stamp.strftime(opt['filename'])%val)
-        
+
         if not image_files:
             raise mipp.NoFiles("no data files: '%s'"%(time_stamp.strftime(opt['filename'])%val))
         image_files.sort()
@@ -119,7 +119,7 @@ class SatelliteLoader(object):
         # Check if the files are xrit-compressed, and decompress them
         # accordingly:
         decomp_files = decompress(image_files)
-                
+
         logger.info("Read %s" % prologue)
         prologue = _xrit.read_prologue(prologue)
 
@@ -139,7 +139,7 @@ class SatelliteLoader(object):
             epilogue = _xrit.read_epilogue(epilogue)
             return self.load_files(prologue, decomp_files,
                                    epilogue=epilogue, **kwarg)
-        
+
         return self.load_files(prologue, decomp_files, **kwarg)
 
     def load_files(self, prologue, image_files, only_metadata=False, **kwargs):
@@ -148,7 +148,7 @@ class SatelliteLoader(object):
             return self._read_metadata(prologue, image_files, **kwargs)
         else:
             return self._read(prologue, image_files, **kwargs)
-        
+
 
     def _read_metadata(self, prologue, image_files, epilogue=None):
         if epilogue:
@@ -163,20 +163,20 @@ class SatelliteLoader(object):
                 logger.warning("Modifying sub satellite point from %.2f to %.2f"%
                                (self.sublon, mda.sublon))
                 self.sublon = mda.sublon
-                
-        
+
+
         chn = self._config_reader.get_channel(mda.channel)
         if mda.image_size[0] != chn.size[0]:
             raise mipp.ReaderError("unknown image width for %s, %s: %d"%
                                    (self.satname, mda.channel, mda.image_size[0]))
-                                
+
         mda.pixel_size = numpy.array([chn.resolution, chn.resolution], dtype=numpy.float64)
         for k, v in self.__dict__.items():
             if k[0] != '_' and type(v) != types.FunctionType:
                 setattr(mda, k, v)
-                
+
         img = _xrit.read_imagedata(image_files[0])
-        
+
         return mda
 
     def _read(self, prologue, image_files, epilogue=None, **kwargs):
@@ -184,7 +184,7 @@ class SatelliteLoader(object):
             mda = self._read_metadata(prologue, image_files, epilogue=epilogue)
         else:
             mda = self._read_metadata(prologue, image_files)
-	len_img = (((mda.image_size[0] + mda.line_offset)*mda.image_size[1])*mda.data_type)//8
+        len_img = (((mda.image_size[0] + mda.line_offset)*mda.image_size[1])*mda.data_type)//8
         logger.info("Data size: %dx%d pixels, %d bytes, %d bits per pixel",
                     mda.image_size[0], mda.image_size[1], len_img, mda.data_type)
 
@@ -192,7 +192,7 @@ class SatelliteLoader(object):
         # Return a proxy slicer
         #
         return ImageLoader(mda, image_files, **kwargs)
-            
+
     #
     # Manipulate proj4's lon_0 parameter
     #
@@ -228,9 +228,9 @@ def decompress(infiles, **options):
 
     if not cmd:
         logger.info("XRIT_DECOMPRESS_OUTDIR is not defined. " +
-                    "The decompressed files will be put in " + 
+                    "The decompressed files will be put in " +
                     "the same directory as compressed ones")
-        
+
     decomp_files = []
     for filename in infiles:
         if filename.endswith('C_'):
@@ -256,29 +256,29 @@ def load_files(prologue, image_files, epilogue=None, **kwarg):
         logger.info("Read %s"%epilogue)
         epilogue = _xrit.read_epilogue(epilogue)
     satname = prologue.platform.lower()
-    return SatelliteLoader(mipp.cfg.read_config(satname)).load_files(prologue, 
-                                                                     image_files, 
-                                                                     epilogue=epilogue, 
+    return SatelliteLoader(mipp.cfg.read_config(satname)).load_files(prologue,
+                                                                     image_files,
+                                                                     epilogue=epilogue,
                                                                      **kwarg)
 
 def load(satname, time_stamp, channel, **kwarg):
     return SatelliteLoader(mipp.cfg.read_config(satname)).load(time_stamp, channel, **kwarg)
- 
+
 def load_meteosat07(time_stamp, channel, **kwarg):
     return load('meteosat07', time_stamp, channel, **kwarg)
- 
+
 def load_meteosat09(time_stamp, channel, **kwarg):
     return load('meteosat09', time_stamp, channel, **kwarg)
 
 def load_goes11(time_stamp, channel, **kwarg):
     return load('goes11', time_stamp, channel, **kwarg)
- 
+
 def load_goes12(time_stamp, channel, **kwarg):
     return load('goes12', time_stamp, channel, **kwarg)
- 
+
 def load_goes13(time_stamp, channel, **kwarg):
     return load('goes13', time_stamp, channel, **kwarg)
- 
+
 def load_mtsat1r(time_stamp, channel, **kwarg):
     return load('mtsat1r', time_stamp, channel, **kwarg)
 
