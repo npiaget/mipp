@@ -8,7 +8,7 @@
 
 import sys
 from datetime import timedelta
-from io import StringIO
+from io import BytesIO
 import numpy as np
 
 from mipp import CalibrationError
@@ -24,10 +24,10 @@ BINARY_HEADER_LEN = 144515
 BINARY_HEADER_LEN_VISCOMP = 192999
 
 def _read_ascii_header(fp):
-    fp = StringIO(fp.read(ASCII_HEADER_LEN)) # Don't mix iteration and read method.
+    fp = BytesIO(fp.read(ASCII_HEADER_LEN)) # Don't mix iteration and read method.
     hdr = dict()
     for line in fp:
-        k = line[:14].strip()
+        k = line[:14].strip().decode('utf8')
         v = line[15:].strip()
         hdr[k] = v
     return hdr
@@ -45,12 +45,12 @@ def _read_binary_header(fp, product_type):
     fp.read(2) # spares
     hdr['proc'] = rbin.read_int4(fp.read(4))
     hdr['chan'] = rbin.read_int4(fp.read(4))
-    calco_str = fp.read(5)
+    calco_str = fp.read(5).decode('utf8')
     if calco_str == '\0\0\0\0\0':
         hdr['calco'] =  None
     else:
         hdr['calco'] =  float(calco_str) / 100000.0
-    space_str = fp.read(3)
+    space_str = fp.read(3).decode('utf8')
     if space_str == '\0\0\0':
         hdr['space'] = 0.0
     else:
@@ -294,7 +294,7 @@ def read_metadata(prologue, image_files):
     """ Selected items from the Meteosat-7 prolog file.
     """
     im = _xrit.read_imagedata(image_files[0])
-    fp = StringIO(prologue.data)
+    fp = BytesIO(prologue.data)
     asc_hdr = _read_ascii_header(fp)
     bin_hdr = _read_binary_header(fp, asc_hdr['ProductType'])
     md = Metadata()
@@ -308,15 +308,17 @@ def read_metadata(prologue, image_files):
     md.product_type = asc_hdr['ProductType']
     md.region_name = 'full disc'
     md.sublon = bin_hdr['ssp']
-    md.first_pixel = asc_hdr['FirstPixelOri']
+    md.first_pixel = asc_hdr['FirstPixelOri'].decode('utf8')
     md.data_type = bin_hdr['dtype']*8
     md.no_data_value = 0
     md.image_size = (int(asc_hdr['NumberOfPixels']), int(asc_hdr['NumberOfLines']))
     md.line_offset = int(asc_hdr['LineOffset'])
     # handle 24 hour clock
-    d, t = strptime(asc_hdr['Date'], "%y%m%d"), int(asc_hdr['Time'])
+    d, t = strptime(asc_hdr['Date'].decode('utf8'), "%y%m%d"), int(asc_hdr['Time'])
     md.time_stamp = d + timedelta(hours=t//100, minutes=t%100)
-    md.production_time = strptime(asc_hdr['ProdDate'] + asc_hdr['ProdTime'], "%y%m%d%H:%M:%S")
+    md.production_time = strptime(
+        asc_hdr['ProdDate'].decode('utf8') + asc_hdr['ProdTime'].decode('utf8'),
+        "%y%m%d%H:%M:%S")
     md.calibration_unit = 'counts'
 
     # Calibration table
