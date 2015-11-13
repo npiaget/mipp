@@ -1,6 +1,7 @@
 #
-# $Id$ 
+# $Id$
 #
+from __future__ import print_function
 import os
 import tarfile
 import glob
@@ -73,10 +74,10 @@ class SatelliteLoader(object):
         mda = self._load_metadata(channel)
         if only_metadata:
             return mda
-        mda, img = self._load_image(mda, mask=mask, calibrate=calibrate)        
+        mda, img = self._load_image(mda, mask=mask, calibrate=calibrate)
         return mipp.mda.mslice(mda), img
 
-        
+
     def _load_metadata(self, channel):
         del channel
         opt = self._config_reader('level1')
@@ -118,14 +119,14 @@ class SatelliteLoader(object):
     def _find_tarfile(self, time_stamp):
         opt = self._config_reader('level1')
         if not os.path.isdir(opt['dir']):
-            raise IOError, "No such directory: %s" % opt['dir']
+            raise IOError("No such directory: %s" % opt['dir'])
         tar_file = glob.glob(opt['dir'] + '/' +
                              time_stamp.strftime(opt['filename_archive']))
         if not tar_file:
             raise mipp.NoFiles("found no archive file: '%s'"%
                                (time_stamp.strftime(opt['filename_archive'])))
         elif len(tar_file) > 1:
-            raise mipp.NoFiles("found multiple archive files: '%s'" % 
+            raise mipp.NoFiles("found multiple archive files: '%s'" %
                                str(tar_file))
         return tar_file[0]
 
@@ -160,7 +161,7 @@ if __name__ == '__main__':
     try:
         _file = args[0]
     except IndexError:
-        print >> sys.stderr, "usage: sat.py [-m] <tar-file>"
+        print("usage: sat.py [-m] <tar-file>", file=sys.stderr)
         sys.exit(1)
     _mda = load_file(_file, 'sarx', only_metadata=True)
     if only_mda:
@@ -170,4 +171,4 @@ if __name__ == '__main__':
         _mda, _image = load_file(_file, 'sarx', calibrate=0)
     else:
         _mda, _image = load_file(_file, 'sarx')
-    print '\n', _mda
+    print('\n', _mda)

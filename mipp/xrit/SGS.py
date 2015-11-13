@@ -1,5 +1,5 @@
 #
-# $Id$ 
+# $Id$
 #
 
 """This module will read satellit data files in SGS (Support Ground Segments) format (eg. GOES, MTSAT).
@@ -30,7 +30,7 @@ def _read_sgs_common_header(fp):
     hdr['BaseAlgorithmVersion'] = fp.read(16).strip()
     hdr['ProductAlgorithmVersion'] = fp.read(16).strip()
     return hdr
-    
+
 def _read_sgs_product_header(fp):
     hdr = dict()
     hdr['ImageProductHeaderVersion'] = rbin.read_uint1(fp.read(1))
@@ -45,7 +45,7 @@ class _Calibrator(object):
         self.hdr = hdr
 
         dd = []
-        for k in sorted(hdr.keys()):
+        for k in sorted(hdr.keys(), key=lambda x: str(x)):
             if isinstance(k, int):
                 v = hdr[k]
                 dd.append([float(k), v])
@@ -84,7 +84,7 @@ def read_metadata(prologue, image_files):
     md.product_name = prologue.product_id
     md.channel = prologue.product_name[:4]
     ssp = float(im.product_name[5:-1].replace('_','.'))
-    if im.product_name[-1].lower() == 'w':            
+    if im.product_name[-1].lower() == 'w':
         ssp *= -1
     md.sublon = ssp
     md.first_pixel = 'north west'
@@ -98,7 +98,7 @@ def read_metadata(prologue, image_files):
 
     # Calibration table
     dd = []
-    for k in sorted(hdr.keys()):
+    for k in sorted(hdr.keys(), key=lambda x: str(x)):
         if isinstance(k, int):
             v = hdr[k]
             dd.append([float(k), v])
@@ -119,6 +119,6 @@ def read_prologue_headers(fp):
     hdr = _read_sgs_common_header(fp)
     hdr.update(_read_sgs_product_header(fp))
     return hdr
-    
+
 if __name__ == '__main__':
-    print read_metadata(_xrit.read_prologue(sys.argv[1]), sys.argv[2:])
+    print(read_metadata(_xrit.read_prologue(sys.argv[1]), sys.argv[2:]))

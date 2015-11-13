@@ -31,7 +31,7 @@ logger = logging.getLogger(__name__)
 
 import sys
 import numpy as np
-from StringIO import StringIO
+from io import BytesIO
 
 from mipp import CalibrationError
 from mipp.xrit import _xrit
@@ -797,10 +797,10 @@ def read_metadata(prologue, image_files, epilogue):
     """
     segment_size = 464 # number of lines in a segment
 
-    fp = StringIO(prologue.data)
+    fp = BytesIO(prologue.data)
     hdr = read_proheader(fp)
 
-    fp = StringIO(epilogue.data)
+    fp = BytesIO(epilogue.data)
     ftr = read_epiheader(fp)
 
     im = _xrit.read_imagedata(image_files[0])
@@ -885,4 +885,4 @@ def read_scanline_quality(segment_filename):
 if __name__ == '__main__':
     p = _xrit.read_prologue(sys.argv[1])
     e = _xrit.read_epilogue(sys.argv[-1])
-    print read_metadata(p, sys.argv[2:-1], e)
+    print(read_metadata(p, sys.argv[2:-1], e))

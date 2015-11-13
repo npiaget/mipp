@@ -95,6 +95,6 @@ def read_metadata(xml_file):
 if __name__ == '__main__':
     import sys
     mda = read_metadata(sys.argv[1])
-    print mda
-    print mda.tiepoints.image
-    print mda.tiepoints.geodedic
+    print(mda)
+    print(mda.tiepoints.image)
+    print(mda.tiepoints.geodedic)

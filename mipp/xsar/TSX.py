@@ -65,7 +65,7 @@ class _Calibrator(object):
             return (image,
                     'counts')
         if self.error:
-            raise mipp.CalibrationError, self.error
+            raise mipp.CalibrationError(self.error)
         return (image*image*self.factor,
                 self.unit)
 

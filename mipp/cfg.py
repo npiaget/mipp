@@ -3,7 +3,12 @@
 #
 import os
 import re
-from ConfigParser import ConfigParser
+try:
+    # 3.x name
+    from configparser import ConfigParser
+except ImportError:
+    # 2.x name
+    from ConfigParser import ConfigParser
 
 import mipp
 
@@ -28,7 +33,7 @@ class _ConfigReader(object):
                 (satname, self.config_file))
         self._config = ConfigParser()
         self._config.read(self.config_file)
-        
+
         instruments = self.get('satellite')['instruments']
         if not instrument:
             if len(instruments) == 1:
@@ -36,11 +41,11 @@ class _ConfigReader(object):
             else:
                 raise mipp.ConfigReaderError("please specify instrument")
         else:
-            if instrument not in instruments: 
+            if instrument not in instruments:
                 raise mipp.ConfigReaderError("unknown instrument: '%s'"%
                                              instrument)
         self.instrument = instrument
-        
+
         self._channels = self._channels2dict(instrument)
 
     def __call__(self, section):
@@ -77,7 +82,7 @@ class _ConfigReader(object):
                 chn = _Channel(self._config.items(sec, raw=True), raw=True)
                 channels[chn.name] = chn
         return channels
-    
+
 class _Channel:
     def __init__(self, kvs, raw=False):
         self.name = None
@@ -97,7 +102,7 @@ class _Channel:
             elif key == 'frequency':
                 val = "(%.2f, %.2f, %.2f)" % val
             text += key + ': ' + str(val) + ', '
-        return text[:-2]    
+        return text[:-2]
 
 def _eval(val):
     try:
@@ -112,8 +117,8 @@ if __name__ == '__main__':
     cfg = read_config(os.path.splitext(fname)[0])
     for _name in ('satellite', 'level1', 'level2'):
         _sec = cfg(_name)
-        print _name
+        print(_name)
         for _key in sorted(_sec.keys()):
-            print '    ', _key + ':',  _sec[_key]
+            print('    ', _key + ':',  _sec[_key])
     for _name in cfg.channel_names:
-        print cfg.get_channel(_name)
+        print(cfg.get_channel(_name))

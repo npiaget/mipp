@@ -128,7 +128,7 @@ class ImageLoader(object):
         # slice
         area_extent = tuple(area_extent)
         if len(area_extent) != 4:
-            raise TypeError, "optional argument must be an area_extent"
+            raise TypeError("optional argument must be an area_extent")
 
         ns_, ew_ = self.mda.first_pixel.split()
 
@@ -183,12 +183,12 @@ class ImageLoader(object):
                 if isinstance(columns, int):
                     columns = slice(item[1], item[1] + 1)
             else:
-                raise IndexError, "can only handle two indexes, not %d"%len(item)
+                raise IndexError("can only handle two indexes, not %d"%len(item))
         elif item is None:
             # full disc
             rows, columns = self._allrows, self._allcolumns            
         else:
-            raise IndexError, "don't understand the indexes"
+            raise IndexError("don't understand the indexes")
 
         # take care of [:]
         if rows.start == None:
@@ -198,7 +198,7 @@ class ImageLoader(object):
             
         if (rows.step != 1 and rows.step != None) or \
                (columns.step != 1 and columns.step != None):
-            raise IndexError, "Currently we don't support steps different from one"
+            raise IndexError("Currently we don't support steps different from one")
 
         return rows, columns
 
@@ -252,7 +252,7 @@ class ImageLoader(object):
             columns.stop > mda.image_size[0] or
             rows.start < 0 or
             rows.stop > mda.image_size[1]):
-            raise IndexError, "index out of range"
+            raise IndexError("index out of range")
 
         image_files = self.image_files
         
@@ -283,8 +283,8 @@ class ImageLoader(object):
             data_type = numpy.uint16
             data_type_len = 16
         else:
-            raise mipp.ReaderError, "unknown data type: %d bit per pixel"\
-                %mda.data_type
+            raise mipp.ReaderError("unknown data type: %d bit per pixel"\
+                %mda.data_type)
 
         #
         # Calculate initial and final line and column.
@@ -328,8 +328,8 @@ class ImageLoader(object):
             increment_line = -1
             factor_col = -1
         else:
-            raise mipp.ReaderError, "unknown geographical orientation of " + \
-                "first pixel: '%s'"%mda.first_pixel
+            raise mipp.ReaderError("unknown geographical orientation of " + \
+                "first pixel: '%s'"%mda.first_pixel)
 
         #
         # Generate final image with no data

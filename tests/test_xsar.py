@@ -18,13 +18,13 @@ try:
 except KeyError:
     os.environ['PPP_CONFIG_DIR'] = datadir
 if not os.path.isdir(os.environ['PPP_CONFIG_DIR']):
-    raise mipp.ConfigReaderError, "No config dir: '%s'"%os.environ['PPP_CONFIG_DIR']
+    raise mipp.ConfigReaderError("No config dir: '%s'"%os.environ['PPP_CONFIG_DIR'])
 
 txs1_file = datadir + '/TX01_SAR_SC_GEC_20110825T104705_20110825T104727_NSG_023264_8133_test.TSX.tar'
 tsx1_sum = 3895.1342095
 
 def make_image(mda, img, outdir='.'):
-    if not os.environ.has_key('DEBUG'):
+    if 'DEBUG' not in os.environ:
         return
     import Image as pil
     fname = outdir + '/' + mda.product_name + '.png'
